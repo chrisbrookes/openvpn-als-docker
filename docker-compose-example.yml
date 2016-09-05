@@ -18,9 +18,7 @@ services:
      - conf:/opt/openvpn-als/adito/conf
     image: local/openvpn-als
     restart: unless-stopped
-
-    # The tail here is to prevent constant restarting if the ant task fails
-    command: /bin/sh -c 'cd adito && ant start-using-java; tail -f /dev/null'
+    command: /bin/sh -c 'cd adito && ant start-using-java'
 
   # Install: Run once to install/reconfigure OpenVpn ALS
   install:
