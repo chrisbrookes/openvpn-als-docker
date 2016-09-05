@@ -1,0 +1,42 @@
+# Note you cannot start both these services at the same time.
+# Run:
+#   docker-compose up install
+# Then after this has completed, run:
+#   docker-compose up -d run
+
+version: '2'
+services:
+  # Run: the main service
+  run:
+    build: .
+    container_name: openvpnals
+    ports:
+     - "443:443"
+    volumes:
+     - $HOME/docker-volumes/openvpn-als/db:/opt/openvpn-als/adito/db
+     - $HOME/docker-volumes/openvpn-als/logs:/opt/openvpn-als/adito/logs
+     - conf:/opt/openvpn-als/adito/conf
+    image: local/openvpn-als
+    restart: unless-stopped
+
+    # The tail here is to prevent constant restarting if the ant task fails
+    command: /bin/sh -c 'cd adito && ant start-using-java; tail -f /dev/null'
+
+  # Install: Run once to install/reconfigure OpenVpn ALS
+  install:
+    build: .
+    container_name: openvpnals-install
+    ports:
+     - "28080:28080"
+    volumes:
+     - $HOME/docker-volumes/openvpn-als/db:/opt/openvpn-als/adito/db
+     - $HOME/docker-volumes/openvpn-als/logs:/opt/openvpn-als/adito/logs
+     - conf:/opt/openvpn-als/adito/conf
+    image: local/openvpn-als
+    restart: never
+    command: ant install
+
+# docker compose will look after the volume. Location: /var/lib/docker/volumes/dockeropenvpnals_conf/_data
+# This should survive a docker-compose down.
+volumes:
+    conf:
